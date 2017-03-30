@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# Install docker
+yum install -y docker
+
+# Add any docker daemon options
+if [ -n "${docker_daemon_options}" ]; then
+	echo 'OPTIONS="${docker_daemon_options}"' >> /etc/sysconfig/docker
+fi
+
+# hack to get storage plugins working
+ln -s /var/run/docker/plugins /run/docker/plugins
+
+# Start docker
+service docker start
+
+# Get the instance id from metadata
+instanceId=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+instanceAz=$(curl -s http://169.254.169.254/latest/meta-data/placement/availability-zone)
+instancePrivateIp=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)
+
+# a more reasonable hostname
+hostname "${cluster_name}-$instanceId"
+
+# Labels
+instanceLabels="hostid=$instanceId&cluster=${cluster_name}&awsaz=$instanceAz"
+customLabels="${cluster_instance_labels}"
+if [ -n "$customLabels" ]; then
+	instanceLabels="$instanceLabels&$customLabels"
+fi
+
+# Add external DNS label if there's a public IP address
+instancePublicIp=$(curl -f -s http://169.254.169.254/latest/meta-data/public-ipv4)
+if [ -n "$instancePublicIp" ]; then
+	instanceLabels="$instanceLabels&io.rancher.host.external_dns_ip=$instancePublicIp"
+fi
+
+# Use the command in the response to start the rancher agent
+cmd="${rancher_registration_command}"
+eval $${cmd/sudo docker run /docker run -e CATTLE_AGENT_IP=$instancePrivateIp -e CATTLE_HOST_LABELS=\"$instanceLabels\" }
