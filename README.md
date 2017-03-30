@@ -1,7 +1,7 @@
 # Rancher Hosts AutoScale Cluster
 
-Rancher Hosts AutoScale terraform module is a resuable way
-to create autoscale-backed Amazon Linux rancher hosts that
+Rancher Hosts AutoScale terraform module is a reusable way
+to create autoscale backed Amazon Linux rancher hosts that
 automatically register and label themselves upon boot.
 
 ## Features
@@ -24,9 +24,10 @@ automatically register and label themselves upon boot.
 ```hcl
 module "cluster" {
   # Import the module from Github
-  source = "https://github.com/socialengine/terraform-autoscale-rancher-host/archive/v1.0.0.zip"
+  source = "github.com/SocialEngine/terraform-autoscale-rancher-host?ref=v1.0.0"
 
-  # Name your cluster and provide the autoscaling group name and security group id.
+
+  # Name your cluster and provide the auto-scaling group name and security group id.
   # See examples below.
   cluster_name = "rancher-cluster"
 
@@ -50,13 +51,16 @@ module "cluster" {
 }
 ```
 
+Run `terraform get` to download the module locally. Also check 
+[releases](https://github.com/SocialEngine/terraform-autoscale-rancher-host/releases) for latest version.
+
 Each launched host will show up in rancher with these labels:
 
 - `awsaz`: Availability zone for the host
 - `cluster`: `${cluster_name}` above
 - `hostid`: instance id, i.e `i-123abc`
 
-Addtionally, we set each hostname to be `${cluster_name}-${hostId}`
+Additionally, we set each hostname to be `${cluster_name}-${hostId}`
 
 ## Examples of required resources
 
@@ -73,7 +77,7 @@ data "aws_security_group" "private" {
 ```hcl
 # Autoscaling launch configuration
 resource "aws_launch_configuration" "cluster_launch_conf" {
-  # Use prefix so configruation can be recreated
+  # Use prefix so configuration can be recreated
   name_prefix = "rancher-node-config-"
 
   # Amazon linux, us-west-2
@@ -131,3 +135,9 @@ resource "aws_autoscaling_group" "cluster_autoscale_group" {
   }
 }
 ```
+
+## Attribution and License 
+
+This is based heavily on [`terraform-aws-rancher-hosts`](https://github.com/greensheep/terraform-aws-rancher-hosts) by @greensheep. Thank you for your work.
+
+Similarly, licensed under MIT. See `LICENSE` file for full details.
