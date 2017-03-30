@@ -24,7 +24,7 @@ automatically register and label themselves upon boot.
 ```hcl
 module "cluster" {
   # Import the module from Github
-  source = "github.com/SocialEngine/terraform-autoscale-rancher-host?ref=v1.0.0"
+  source = "github.com/SocialEngine/terraform-autoscale-rancher-host?ref=v1.0.1"
 
 
   # Name your cluster and provide the auto-scaling group name and security group id.

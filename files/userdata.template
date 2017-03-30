@@ -9,6 +9,7 @@ if [ -n "${docker_daemon_options}" ]; then
 fi
 
 # hack to get storage plugins working
+mkdir -p -m=600 /run/docker
 ln -s /var/run/docker/plugins /run/docker/plugins
 
 # Start docker
